@@ -1,24 +1,18 @@
-import random
 import math
 import numpy as np
-from sklearn.model_selection import KFold
-from random import randint
-
 
 trained = 0
 correctPredicted = 0
 errorTolerance = 0.7
 learnSpeed = 0.6
 totalAccuracy = 0
+epoch = 1
 
-# neuron00weights = np.random.rand(2,1)
-# neuron01weights = np.random.rand(2,1)
-# neuron10weights = np.random.rand(2,1)
-neuron00weights = [1, 3] #hidden layer first neuron weights
-neuron01weights = [2, -1] #hidden layer second neuron weights
-neuron10weights = [0.3, 0.1] #output layer weights
+neuron00weights = [0.01, 0.01] #hidden layer first neuron weights
+neuron01weights = [0.02, 0.02] #hidden layer second neuron weights
+neuron10weights = [0.01, 0.01] #output layer weights
 
-hiddenLayer = [neuron00weights, neuron01weights]
+weights = [neuron00weights, neuron01weights, neuron10weights]
 
 def sigmoid(sum):
   return 1 / (1 + math.exp(-sum))
@@ -26,54 +20,73 @@ def sigmoid(sum):
 def sumFunction(inputs, weights):
     neuronSum = 0
     for i in range (0, len(weights), 1):
-        print(inputs[i])
-        print(weights[i])
-        # neuronSum += inputs[i]*weights[i]
-        print(f'Girdi: {inputs[i]}, Çarpılan Ağırlık: {weights[i]}')
-    # for i in range(0, len(withoutId),1):
-    #     neuronSum = neuronSum + float(withoutId[i])*neuronWeights[i][0]
+        neuronSum += inputs[i]*weights[i]
     return neuronSum  
-
-# def hiddenLayer(dataSetPiece):
-#     neuron00 = sumFunction(dataSetPiece, neuron00weights) #Calculate neuron00 Sum
-#     derivativeNeuron00 = sigmoid(neuron00) #Get derivative result for neuron00 Sum 
-#     neuron01 = sumFunction(dataSetPiece, neuron01weights)
-#     derivativeNeuron01 = sigmoid(neuron01)
-#     hiddenLayer1(derivativeNeuron00, derivativeNeuron01, dataSetPiece[10]) #Send sums to second hidden layer
 
 def calculateError(currentResult, correctResult):
     correctResult = float(correctResult)
     error = currentResult*(1-currentResult)*(correctResult-currentResult) #Calculate error     
     return error
 
+def updateWeights(currentResult, error):
+    delta = learnSpeed*error*currentResult
+    for i in range(0,len(weights),1):
+        for j in range(0, len(weights[i]), 1):
+            weights[i][j] = weights[i][j] + delta
+    
 # def updateWeights(currentResult, error):
 #     delta = learnSpeed*error*currentResult
 #     for i in range(0,len(weights),1):
-#         for weight in weights[i]:
-#             weight = weight + delta
-         
-data = [[1,1,0], [0,0,0], [1,0,1], [0,1,1]]
-hiddenSums =[[],[]]
+#         for j in range(0, len(weights[i]), 1):
+#             weights[i][j] = weights[i][j] + delta
 
-for element in data:
-    inputs = [element[0], element[1]]
-    correctResult = element[2]
-    for i, neuronWeights in enumerate(hiddenLayer):
-        hiddenSums[i] = sumFunction(inputs, neuronWeights)
-        print(f'Toplam: {hiddenSums[i]}')
-    print("------------- Toplamlar Hesaplandı -------------")
-    print(f'HIDDEN SUMS: {hiddenSums}')
-    outputLayerSum = sumFunction(hiddenSums, neuron10weights)
-    print(f'Output Sum: {outputLayerSum}')
-    print("-------------  ------------- \n")
-    # neuronOutput = sigmoid(hiddenLayerSum) #input layer result
-    # error = calculateError(neuronOutput, correctResult)
-    # print(f'Beklenen: {correctResult} Tahmin: {neuronOutput} Hata: {error}')
-    # print(f'Ağırlıklar önce 00: {neuron00weights} 01: {neuron01weights} 10: {neuron10weights}')
-    # updateWeights(neuronOutput, error)
-    # print(f'Ağırlıklar sonra 00: {neuron00weights} 01: {neuron01weights} 10: {neuron10weights}')
-    # print("\n")
+def updateOutputWeights(currentResult, error):
+    delta = learnSpeed*error*currentResult
+    for i in range(0,len(weights),1):
+        for j in range(0, len(weights[i]), 1):
+            weights[i][j] = weights[i][j] + delta
+
+def updateHiddenWeights():
 
 
-    # for j in range(0, len(inputs), 1):
-    #   neuronSum[j] = sumFunction(inputs, weights[j])
+def test(testData):
+    for i, neuron in enumerate(hiddenLayer):
+        neuronSum = sumFunction(testData, neuron)
+        hiddenOuts[i] = sigmoid(neuronSum)
+    outputSum = sumFunction(hiddenOuts, neuron10weights)
+    output = sigmoid(outputSum)
+    error = calculateError(output, correctResult)
+    print(f'Tahmin: {output} Hata: {error}')
+
+data = [[1,1], [0,0], [1,0], [0,1]]
+results = [0, 0, 1, 1]
+hiddenOuts =[[],[]]
+hiddenLayer = [weights[0], weights[1]]
+
+for j in range(0, epoch, 1):
+    for k, inputs in enumerate(data):
+        correctResult = results[k]
+        for i, neuron in enumerate(hiddenLayer):
+            neuronSum = sumFunction(inputs, neuron)
+            hiddenOuts[i] = sigmoid(neuronSum)
+            # print(f'Toplam: {neuronSum}')
+            # print(f'Out: {hiddenOuts[i]}')
+        # print("------------- Toplamlar Hesaplandı -------------")
+        # print(f'HIDDEN SUMS: {hiddenOuts}')
+        outputSum = sumFunction(hiddenOuts, neuron10weights)
+        # print(f'Output Sum: {outputSum}')
+        output = sigmoid(outputSum)
+        error = calculateError(output, correctResult)
+        print(f'Beklenen: {correctResult} Tahmin: {output} Hata: {error}')
+        # print(f'Ağırlıklar önce 00: {neuron00weights} 01: {neuron01weights} 10: {neuron10weights}')
+        # updateWeights(output, error)
+        # print(f'Ağırlıklar sonra 00: {neuron00weights} 01: {neuron01weights} 10: {neuron10weights}')
+        # print("-------------  ------------- \n \n \n")
+
+print("Ağ Ağırlıkları Güncellendi")
+
+while True:
+    testData = np.array(input("Test Edilecek İkili: ").split(" ")).astype(int)
+    print(testData)
+    test(testData)
+
