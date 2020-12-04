@@ -8,7 +8,6 @@ neuron00weights = [1, 1] #hidden layer first neuron weights
 neuron01weights = [1, 1] #hidden layer second neuron weights
 neuron10weights = [-1, 1] #output layer weights
 
-weights = [neuron00weights, neuron01weights, neuron10weights]
 outputLayerWeights = neuron10weights
 hiddenLayerWeights =[neuron00weights, neuron01weights]
 
