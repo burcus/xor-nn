@@ -1,12 +1,14 @@
 import math
 import numpy as np
 
-learnSpeed = 0.5
-epoch = 100000
+epsilon = 0.002 #error condition to stop iteration
 
-neuron00weights = [1, 1] #hidden layer first neuron weights
-neuron01weights = [1, 1] #hidden layer second neuron weights
-neuron10weights = [-1, 1] #output layer weights
+learnSpeed = float(input("Learn Speed Factor: "))
+epoch = int(input("Epoch: "))
+
+neuron00weights = np.array(input("Hidden Layer's First Neurons Weights:").split(" ")).astype(float)
+neuron01weights = np.array(input("Hidden Layer's Second Neurons Weights:").split(" ")).astype(float)
+neuron10weights = np.array(input("Output Layer Neurons Weights:").split(" ")).astype(float)
 
 outputLayerWeights = neuron10weights
 hiddenLayerWeights =[neuron00weights, neuron01weights]
@@ -21,8 +23,10 @@ def sumFunction(inputs, weights):
     return neuronSum  
 
 def outputError(currentResult, correctResult):
+    global rmseSum
     correctResult = float(correctResult)
     error = currentResult*(1-currentResult)*(correctResult-currentResult)    
+    rmseSum += math.pow(error,2)
     return error
 
 def hiddenError(currentResult, correctResult, error, Wj5):
@@ -57,6 +61,7 @@ hiddenSums = [[],[]]
 hiddenErrors = [[],[]]
 
 for j in range(0, epoch, 1):
+    rmseSum = 0
     for k, inputs in enumerate(data):
         correctResult = results[k]
         for i, neuron in enumerate(hiddenLayerWeights):
@@ -70,10 +75,17 @@ for j in range(0, epoch, 1):
             hiddenErrors[i] = hiddenError(hiddenOuts[i], correctResult, error, outputLayerWeights[i])
         updateHiddenWeights(hiddenOuts, hiddenErrors, inputs)
         updateOutputWeights(error)
+    rms = rmseSum / len(data)
+    rmse = math.sqrt(rms)
+    if(rmse <= epsilon):
+        print(f'RMSE Değeri: {rmse}')
+        print(f'{j}. Epochta Sonlandı')
+        break
 
+print(f'Root Mean Square Error: {rmse}\n')
 print("Weights updated")
 
 while True:
-    testData = np.array(input("Test Values: ").split(" ")).astype(int)
+    testData = np.array(input("Test Values: ").split(" ")).astype(float)
     test(testData)
 
